@@ -7,6 +7,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Builder
 public record GitHubFetcherRestTemplateConfigurationProperties(
         String uri,
+        String token,
         int connectionTimeout,
         int readTimeout
 ) {

@@ -1,5 +1,7 @@
 package org.example.githubrepofetcher.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.githubrepofetcher.model.dto.BranchDto;
@@ -22,11 +24,14 @@ import java.util.stream.Collectors;
 public class GitHubFetcherRestTemplate implements GitHubFetcher {
     private final RestTemplate restTemplate;
     private final String uri;
+    private final String githubToken;
 
     @Override
     public List<GithubRepositoryDto> fetchGitHubRepositories(String username) {
         log.info("Fetching GitHub repositories for user: {}", username);
         HttpHeaders headers = new HttpHeaders();
+        System.out.println("Using token: " + githubToken);
+        headers.set("Authorization", "Bearer " + githubToken);
         final HttpEntity<HttpHeaders> requestEntity = new HttpEntity<>(headers);
 
         try {
@@ -78,23 +83,38 @@ public class GitHubFetcherRestTemplate implements GitHubFetcher {
         final String url = UriComponentsBuilder
                 .fromUriString(uri + "/repos/" + owner + "/" + repositoryName + "/branches")
                 .toUriString();
-        ResponseEntity<List<GitHubBranchResponseDto>> response = restTemplate.exchange(
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + githubToken);
+
+        ResponseEntity<String> rawResponse = restTemplate.exchange(
                 url,
                 HttpMethod.GET,
-                new HttpEntity<>(new HttpHeaders()),
-                new ParameterizedTypeReference<>() {
-                }
+                new HttpEntity<>(headers),
+                String.class
         );
 
-        List<GitHubBranchResponseDto> branches = response.getBody();
-        if (branches.isEmpty()) {
-            log.warn("No branches found for repo: {}/{}", owner, repositoryName);
-            return List.of();
-        }
+        if (rawResponse.getStatusCode().is2xxSuccessful()) {
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                List<GitHubBranchResponseDto> branches = mapper.readValue(
+                        rawResponse.getBody(),
+                        new TypeReference<>() {
+                        }
+                );
 
-        return branches.stream()
-                .map(this::mapToBranchDto)
-                .collect(Collectors.toList());
+                return branches.stream()
+                        .map(this::mapToBranchDto)
+                        .collect(Collectors.toList());
+
+            } catch (Exception e) {
+                log.error("Failed to deserialize branches: {}", e.getMessage());
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Branch response format invalid");
+            }
+        } else {
+            log.error("GitHub returned non-2xx: {} Body: {}", rawResponse.getStatusCode(), rawResponse.getBody());
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "GitHub error");
+        }
     }
 
     private BranchDto mapToBranchDto(GitHubBranchResponseDto branch) {

@@ -1,4 +1,3 @@
-
 # GitHub Repository Fetcher
 
 This project allows you to fetch GitHub repositories for a given user, with a focus on repositories that are not forks. It also handles the case when a GitHub user does not exist and returns an appropriate error response.
@@ -33,7 +32,7 @@ To run the application locally, follow these steps:
     java -version
     ```
 
-    If Java 21 is not installed, download and install it from [AdoptOpenJDK](https://adoptopenjdk.net/) or the official Java website.
+   If Java 21 is not installed, download and install it from [AdoptOpenJDK](https://adoptopenjdk.net/) or the official Java website.
 
 3. Build the application using Maven:
 
@@ -41,13 +40,66 @@ To run the application locally, follow these steps:
     ./mvnw clean install
     ```
 
-4. Run the application:
+4. **Generate a GitHub Personal Access Token (PAT):**
+
+   To authenticate with the GitHub API and increase your rate limit, you need to generate a PAT:
+
+   - Log in to your GitHub account.
+   - Go to **Settings > Developer settings > Personal access tokens** or click [here](https://github.com/settings/tokens).
+   - Click **"Fine-grained tokens"** or **"Tokens (classic)"** → then **"Generate new token"**.
+   - **Choose token type:**
+      - For public data access only, select **"Tokens (classic)"**.
+   - **Scopes to select:**
+      - You can **leave all scopes unchecked** if you're only accessing public repositories.
+      - If needed, check `public_repo` for enhanced access to public repositories.
+   - Click **Generate token**, then copy and save it. (It will only be shown once!)
+
+   📌 _Make sure not to share this token or commit it to version control._
+
+5. **Set the token as an environment variable:**
+
+   On your local machine, you can set the `GITHUB_TOKEN` environment variable like so:
+
+   - **On Linux/MacOS**:
+       ```bash
+       export GITHUB_TOKEN=ghp_YourGeneratedTokenHere1234567890
+       ```
+
+   - **On Windows**:
+       ```powershell
+       $env:GITHUB_TOKEN="ghp_YourGeneratedTokenHere1234567890"
+       ```
+
+   Alternatively, you can place the token directly in your `application.yml` (but **don't commit this file** to a public repository, as it will expose your token).
+
+   Example of `application.yml`:
+
+    ```yaml
+    server:
+      port: 8082
+
+    spring:
+      application:
+        name: GitHubRepoFetcher
+
+    github:
+      fetcher:
+        http:
+          client:
+            config:
+              uri: https://api.github.com
+              token: ${GITHUB_TOKEN}
+              connectionTimeout: 5000
+              readTimeout: 5000
+    ```
+
+6. Run the application:
 
     ```bash
     ./mvnw spring-boot:run
     ```
 
-    By default, the application will run on port `8082`. You can access it at:
+   By default, the application will run on port `8082`. You can access it at:
 
     ```bash
     http://localhost:8082
@@ -84,7 +136,7 @@ Fetches GitHub repositories for a given user. Only repositories that are not for
 
     ```json
     {
-        "status": "404",
+        "status": 404,
         "message": "User not found on GitHub"
     }
     ```
@@ -108,6 +160,24 @@ To run the tests, use:
 ## Contribution
 
 If you'd like to contribute to this project, feel free to fork the repository and create a pull request with your changes.
+
+⚠️ GitHub API Rate Limiting
+When using the GitHub API without authentication, GitHub enforces a very low rate limit — 60 requests per hour per IP address.
+
+If this limit is exceeded, you'll receive a response like this:
+
+   ```json
+   {
+       "message": "API rate limit exceeded for 87.92.3.111. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)",
+       "documentation_url": "https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting"
+   }
+   ```
+
+To avoid this, the application uses a GitHub Personal Access Token (PAT) for authentication, which increases the rate limit to 5,000 requests per hour.
+
+👉 Make sure to follow the Running the Application instructions and provide your GitHub token via the GITHUB_TOKEN environment variable.
+
+More details on GitHub rate limiting: GitHub Docs – Rate Limiting
 
 ## License
 
