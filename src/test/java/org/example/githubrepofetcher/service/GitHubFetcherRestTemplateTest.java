@@ -49,7 +49,7 @@ class GitHubFetcherRestTemplateTest {
         List<GitHubRepositoryResponseDto> mockResponse = List.of(repo);
         ResponseEntity<List<GitHubRepositoryResponseDto>> responseEntity = new ResponseEntity<>(mockResponse, HttpStatus.OK);
 
-        String branchResponseJson = GitHubMockData.branchesJson();
+        String branchResponseJson = GitHubRepositoryBranchesMockData.branchJson();
 
         String branchesUrl = "https://api.github.com/repos/test-owner-login/test-repo-name/branches";
 

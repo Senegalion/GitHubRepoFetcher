@@ -47,6 +47,8 @@ public class GitHubFetcherRestTemplate implements GitHubFetcher {
     }
 
     private List<GitHubRepositoryResponseDto> getUserRepositories(String username, HttpEntity<HttpHeaders> requestEntity) {
+        checkIfUserExists(username, requestEntity);
+
         final String url = UriComponentsBuilder.fromUriString(uri + "/users/" + username + "/repos")
                 .toUriString();
         try {
@@ -61,11 +63,32 @@ public class GitHubFetcherRestTemplate implements GitHubFetcher {
             List<GitHubRepositoryResponseDto> repos = response.getBody();
             if (repos.isEmpty()) {
                 log.warn("No repositories found for user: {}", username);
-                throw new GitHubUserNotFoundException("User found, but no repositories available");
             }
 
             return repos;
         } catch (ResponseStatusException e) {
+            log.error("Error occurred while fetching repositories: {}", e.getMessage());
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "GitHub API is unavailable");
+        }
+    }
+
+    private void checkIfUserExists(String username, HttpEntity<HttpHeaders> requestEntity) {
+        final String url = UriComponentsBuilder.fromUriString(uri + "/users/" + username)
+                .toUriString();
+
+        try {
+            ResponseEntity<Void> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    requestEntity,
+                    Void.class
+            );
+
+            if (response.getStatusCode() != HttpStatus.OK) {
+                throw new GitHubUserNotFoundException("User not found on GitHub");
+            }
+
+        } catch (Exception e) {
             log.warn("User {} not found on GitHub", username);
             throw new GitHubUserNotFoundException("User not found on GitHub");
         }

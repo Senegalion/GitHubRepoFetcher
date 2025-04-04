@@ -157,6 +157,10 @@ To run the tests, use:
 ./mvnw test
 ```
 
+Tests include:
+- verifying that the correct repositories are fetched for existing users.
+- ensuring the application correctly handles non-existent GitHub users.
+
 ## Contribution
 
 If you'd like to contribute to this project, feel free to fork the repository and create a pull request with your changes.
