@@ -6,6 +6,7 @@ import org.example.githubrepofetcher.model.dto.BranchDto;
 import org.example.githubrepofetcher.model.dto.GitHubBranchResponseDto;
 import org.example.githubrepofetcher.model.dto.GitHubRepositoryResponseDto;
 import org.example.githubrepofetcher.model.dto.GithubRepositoryDto;
+import org.example.githubrepofetcher.service.exception.GitHubUserNotFoundException;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.web.client.ResourceAccessException;
@@ -43,20 +44,26 @@ public class GitHubFetcherRestTemplate implements GitHubFetcher {
     private List<GitHubRepositoryResponseDto> getUserRepositories(String username, HttpEntity<HttpHeaders> requestEntity) {
         final String url = UriComponentsBuilder.fromUriString(uri + "/users/" + username + "/repos")
                 .toUriString();
-        ResponseEntity<List<GitHubRepositoryResponseDto>> response = restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                requestEntity,
-                new ParameterizedTypeReference<>() {
-                }
-        );
+        try {
+            ResponseEntity<List<GitHubRepositoryResponseDto>> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    requestEntity,
+                    new ParameterizedTypeReference<>() {
+                    }
+            );
 
-        List<GitHubRepositoryResponseDto> repos = response.getBody();
-        if (repos.isEmpty()) {
-            log.warn("No repositories found for user: {}", username);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found or no repositories available");
+            List<GitHubRepositoryResponseDto> repos = response.getBody();
+            if (repos.isEmpty()) {
+                log.warn("No repositories found for user: {}", username);
+                throw new GitHubUserNotFoundException("User found, but no repositories available");
+            }
+
+            return repos;
+        } catch (ResponseStatusException e) {
+            log.warn("User {} not found on GitHub", username);
+            throw new GitHubUserNotFoundException("User not found on GitHub");
         }
-        return repos;
     }
 
     private GithubRepositoryDto mapToGithubRepositoryDto(GitHubRepositoryResponseDto repo) {
