@@ -45,6 +45,6 @@ public class GitHubFetcherClientConfig {
 
     @Bean
     public GitHubFetcher remoteNumberGeneratorClient(RestTemplate restTemplate) {
-        return new GitHubFetcherRestTemplate(restTemplate, properties.uri());
+        return new GitHubFetcherRestTemplate(restTemplate, properties.uri(), properties.token());
     }
 }

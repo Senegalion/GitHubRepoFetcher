@@ -11,5 +11,6 @@ github:
       client:
         config:
           uri: https://api.github.com
+          token: ${GITHUB_TOKEN}
           connectionTimeout: 5000
           readTimeout: 5000
