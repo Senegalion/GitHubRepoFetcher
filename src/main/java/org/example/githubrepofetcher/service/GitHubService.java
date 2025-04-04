@@ -12,7 +12,6 @@ public class GitHubService {
     private final GitHubFetcher gitHubFetcher;
 
     public List<GithubRepositoryDto> getUserGitHubRepositories(String username) {
-        List<GithubRepositoryDto> gitHubRepositories = gitHubFetcher.fetchGitHubRepositories(username);
-        return gitHubRepositories;
+        return gitHubFetcher.fetchGitHubRepositories(username);
     }
 }
