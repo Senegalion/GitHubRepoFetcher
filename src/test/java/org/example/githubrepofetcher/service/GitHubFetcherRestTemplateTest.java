@@ -1,9 +1,10 @@
 package org.example.githubrepofetcher.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.githubrepofetcher.model.dto.GitHubRepositoryResponseDto;
-import org.example.githubrepofetcher.model.dto.GithubRepositoryDto;
-import org.example.githubrepofetcher.model.dto.OwnerDto;
+import org.example.githubrepofetcher.infrastructure.github.GitHubFetcherRestTemplate;
+import org.example.githubrepofetcher.domain.model.dto.github.GitHubRepositoryResponseDto;
+import org.example.githubrepofetcher.domain.model.dto.api.GithubRepositoryDto;
+import org.example.githubrepofetcher.domain.model.dto.github.OwnerDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

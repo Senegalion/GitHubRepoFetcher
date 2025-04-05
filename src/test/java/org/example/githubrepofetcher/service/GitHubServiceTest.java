@@ -1,6 +1,8 @@
 package org.example.githubrepofetcher.service;
 
-import org.example.githubrepofetcher.model.dto.GithubRepositoryDto;
+import org.example.githubrepofetcher.domain.model.dto.api.GithubRepositoryDto;
+import org.example.githubrepofetcher.domain.service.GitHubFetcher;
+import org.example.githubrepofetcher.domain.service.GitHubService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

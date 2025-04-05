@@ -1,13 +1,14 @@
-package org.example.githubrepofetcher.service;
+package org.example.githubrepofetcher.infrastructure.github;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.githubrepofetcher.model.dto.BranchDto;
-import org.example.githubrepofetcher.model.dto.GitHubBranchResponseDto;
-import org.example.githubrepofetcher.model.dto.GitHubRepositoryResponseDto;
-import org.example.githubrepofetcher.model.dto.GithubRepositoryDto;
+import org.example.githubrepofetcher.domain.model.dto.api.BranchDto;
+import org.example.githubrepofetcher.domain.model.dto.github.GitHubBranchResponseDto;
+import org.example.githubrepofetcher.domain.model.dto.github.GitHubRepositoryResponseDto;
+import org.example.githubrepofetcher.domain.model.dto.api.GithubRepositoryDto;
+import org.example.githubrepofetcher.domain.service.GitHubFetcher;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.web.client.ResourceAccessException;

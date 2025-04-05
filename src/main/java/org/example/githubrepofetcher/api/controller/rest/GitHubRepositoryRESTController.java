@@ -1,8 +1,8 @@
-package org.example.githubrepofetcher.controller.rest;
+package org.example.githubrepofetcher.api.controller.rest;
 
 import lombok.AllArgsConstructor;
-import org.example.githubrepofetcher.model.dto.GithubRepositoryDto;
-import org.example.githubrepofetcher.service.GitHubService;
+import org.example.githubrepofetcher.domain.model.dto.api.GithubRepositoryDto;
+import org.example.githubrepofetcher.domain.service.GitHubService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

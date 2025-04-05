@@ -1,4 +1,4 @@
-package org.example.githubrepofetcher.model.dto;
+package org.example.githubrepofetcher.domain.model.dto.github;
 
 import lombok.Builder;
 

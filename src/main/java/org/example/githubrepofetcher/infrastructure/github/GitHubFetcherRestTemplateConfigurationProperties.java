@@ -1,4 +1,4 @@
-package org.example.githubrepofetcher.service;
+package org.example.githubrepofetcher.infrastructure.github;
 
 import lombok.Builder;
 import org.springframework.boot.context.properties.ConfigurationProperties;

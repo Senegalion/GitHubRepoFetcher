@@ -1,6 +1,6 @@
-package org.example.githubrepofetcher.service;
+package org.example.githubrepofetcher.domain.service;
 
-import org.example.githubrepofetcher.model.dto.GithubRepositoryDto;
+import org.example.githubrepofetcher.domain.model.dto.api.GithubRepositoryDto;
 
 import java.util.List;
 
