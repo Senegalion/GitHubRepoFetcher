@@ -45,6 +45,13 @@ class GitHubFetcherRestTemplateTest {
         // given
         String username = "Senegalion";
 
+        when(restTemplate.exchange(
+                eq("https://api.github.com/users/" + username),
+                eq(HttpMethod.GET),
+                any(),
+                eq(Void.class)
+        )).thenReturn(new ResponseEntity<>(HttpStatus.OK));
+
         GitHubRepositoryResponseDto repo = new GitHubRepositoryResponseDto("test-repo-name", false, new OwnerDto("test-owner-login"));
         List<GitHubRepositoryResponseDto> mockResponse = List.of(repo);
         ResponseEntity<List<GitHubRepositoryResponseDto>> responseEntity = new ResponseEntity<>(mockResponse, HttpStatus.OK);

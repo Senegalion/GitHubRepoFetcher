@@ -140,4 +140,28 @@ public class UserFetchGithubRepositoriesIntegrationTest extends BaseIntegrationT
         // then
         result.andExpect(status().isServiceUnavailable());
     }
+
+    @Test
+    void should_return_404_with_proper_error_response_when_user_does_not_exist() throws Exception {
+        // given
+        String username = "nonexistent-user";
+
+        wireMockServer.stubFor(WireMock.get("/users/" + username)
+                .willReturn(aResponse()
+                        .withStatus(HttpStatus.NOT_FOUND.value())
+                        .withHeader("Content-Type", "application/json")));
+
+
+        // when
+        ResultActions result = mockMvc.perform(get("/github/" + username + "/repositories"));
+
+        // then
+        result.andExpect(status().isNotFound())
+                .andExpect(content().json("""
+                            {
+                              "status": 404,
+                              "message": "GitHub user 'nonexistent-user' not found"
+                            }
+                        """, true));
+    }
 }
