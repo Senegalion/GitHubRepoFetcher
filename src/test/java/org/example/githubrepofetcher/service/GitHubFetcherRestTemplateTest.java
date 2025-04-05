@@ -1,10 +1,10 @@
 package org.example.githubrepofetcher.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.githubrepofetcher.infrastructure.github.GitHubFetcherRestTemplate;
-import org.example.githubrepofetcher.domain.model.dto.github.GitHubRepositoryResponseDto;
 import org.example.githubrepofetcher.domain.model.dto.api.GithubRepositoryDto;
+import org.example.githubrepofetcher.domain.model.dto.github.GitHubRepositoryResponseDto;
 import org.example.githubrepofetcher.domain.model.dto.github.OwnerDto;
+import org.example.githubrepofetcher.infrastructure.github.GitHubFetcherRestTemplate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +18,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -38,7 +40,8 @@ class GitHubFetcherRestTemplateTest {
     void setUp() {
         String uri = "https://api.github.com";
         String token = "ghp_YourGeneratedTokenHere1234567890";
-        gitHubFetcherRestTemplate = new GitHubFetcherRestTemplate(restTemplate, uri, token);
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        gitHubFetcherRestTemplate = new GitHubFetcherRestTemplate(restTemplate, uri, token, executorService);
     }
 
     @Test
