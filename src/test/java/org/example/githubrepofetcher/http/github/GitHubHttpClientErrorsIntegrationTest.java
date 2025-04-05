@@ -128,4 +128,17 @@ public class GitHubHttpClientErrorsIntegrationTest extends GitHubHttpClientConfi
         assertThat(throwable).isInstanceOf(ResponseStatusException.class);
         assertThat(throwable.getMessage()).contains(INTERNAL_SERVER_ERROR);
     }
+
+    @Test
+    void should_return_500_internal_server_error_when_connection_fails() {
+        wireMockServer.stubFor(WireMock.get("/users/someuser/repos")
+                .willReturn(WireMock.aResponse()
+                        .withStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                        .withBody("Connection failed")));
+
+        Throwable throwable = catchThrowable(() -> gitHubFetcher.fetchGitHubRepositories("someuser"));
+
+        assertThat(throwable).isInstanceOf(ResponseStatusException.class);
+        assertThat(throwable.getMessage()).contains(INTERNAL_SERVER_ERROR);
+    }
 }

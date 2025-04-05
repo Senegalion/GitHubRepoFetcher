@@ -40,7 +40,7 @@ public class GitHubFetcherRestTemplate implements GitHubFetcher {
                     .collect(Collectors.toList());
         } catch (ResourceAccessException e) {
             log.error("Error while fetching GitHub repositories: {}", e.getMessage());
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Network error while fetching repositories");
         }
     }
 
@@ -81,7 +81,6 @@ public class GitHubFetcherRestTemplate implements GitHubFetcher {
                     requestEntity,
                     Void.class
             );
-
         } catch (ResponseStatusException e) {
             if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
                 log.warn("User {} not found on GitHub", username);
@@ -89,12 +88,14 @@ public class GitHubFetcherRestTemplate implements GitHubFetcher {
             } else if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
                 log.warn("Unauthorized when accessing user {}.", username);
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized access");
+            } else if (e.getStatusCode() == HttpStatus.TOO_MANY_REQUESTS) {
+                log.warn("Too many requests for user {}", username);
+                throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "Too many requests to GitHub API");
             } else {
                 log.error("Error while checking if user exists: {}", e.getMessage());
                 throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "GitHub API is unavailable");
             }
         } catch (ResourceAccessException e) {
-            // Timeouts, connection errors etc.
             log.error("Connection error while checking user existence: {}", e.getMessage());
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "GitHub API is unavailable");
         } catch (Exception e) {
