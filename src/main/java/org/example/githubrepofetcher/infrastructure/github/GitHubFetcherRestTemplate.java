@@ -5,9 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.githubrepofetcher.domain.model.dto.api.BranchDto;
+import org.example.githubrepofetcher.domain.model.dto.api.GithubRepositoryDto;
 import org.example.githubrepofetcher.domain.model.dto.github.GitHubBranchResponseDto;
 import org.example.githubrepofetcher.domain.model.dto.github.GitHubRepositoryResponseDto;
-import org.example.githubrepofetcher.domain.model.dto.api.GithubRepositoryDto;
 import org.example.githubrepofetcher.domain.service.GitHubFetcher;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
@@ -17,6 +17,8 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -25,6 +27,7 @@ public class GitHubFetcherRestTemplate implements GitHubFetcher {
     private final RestTemplate restTemplate;
     private final String uri;
     private final String githubToken;
+    private final ExecutorService executorService;
 
     @Override
     public List<GithubRepositoryDto> fetchGitHubRepositories(String username) {
@@ -35,9 +38,14 @@ public class GitHubFetcherRestTemplate implements GitHubFetcher {
 
         try {
             List<GitHubRepositoryResponseDto> repos = getUserRepositories(username, requestEntity);
-            return repos.stream()
-                    .filter(repo -> !repo.fork())
-                    .map(this::mapToGithubRepositoryDto)
+            List<CompletableFuture<GithubRepositoryDto>> futures = repos.stream()
+                    .filter(repo -> !repo.fork())  // Ignorujemy forkowane repozytoria
+                    .map(this::mapToGithubRepositoryDto)  // Mapowanie do DTO repozytorium
+                    .collect(Collectors.toList());
+
+            // Czekamy na zakończenie pobierania branchy i zwracamy wyniki
+            return futures.stream()
+                    .map(CompletableFuture::join)
                     .collect(Collectors.toList());
         } catch (ResourceAccessException e) {
             log.error("Error while fetching GitHub repositories: {}", e.getMessage());
@@ -105,12 +113,20 @@ public class GitHubFetcherRestTemplate implements GitHubFetcher {
         }
     }
 
-    private GithubRepositoryDto mapToGithubRepositoryDto(GitHubRepositoryResponseDto repo) {
-        return GithubRepositoryDto.builder()
-                .repositoryName(repo.name())
-                .ownerLogin(repo.owner().login())
-                .branches(fetchBranches(repo.owner().login(), repo.name()))
-                .build();
+    private CompletableFuture<GithubRepositoryDto> mapToGithubRepositoryDto(GitHubRepositoryResponseDto repo) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                List<BranchDto> branches = fetchBranches(repo.owner().login(), repo.name());
+                return GithubRepositoryDto.builder()
+                        .repositoryName(repo.name())
+                        .ownerLogin(repo.owner().login())
+                        .branches(branches)
+                        .build();
+            } catch (Exception e) {
+                log.error("Failed to fetch branches for repo: {} - {}", repo.name(), e.getMessage());
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to fetch branches");
+            }
+        }, executorService);
     }
 
     private List<BranchDto> fetchBranches(String owner, String repositoryName) {

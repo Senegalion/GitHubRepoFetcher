@@ -15,6 +15,45 @@ It also handles the case when a GitHub user does not exist and returns an approp
 - Filters repositories to exclude forks.
 - For each repository, fetches branches and their last commit SHA.
 - Handles the case where the user does not exist on GitHub and returns a 404 error with a custom response format.
+- Improved architecture with asynchronous fetching: The service now uses an ExecutorService for better performance when
+  fetching data from GitHub.
+
+## Changes in Data Fetching Logic
+
+In the updated version of the service, the data fetching mechanism has been optimized to include an ExecutorService for
+asynchronous operations. This ensures that requests to the GitHub API are handled in parallel, improving performance and
+responsiveness.
+
+### GitHubFetcherRestTemplate Constructor Update
+
+To accommodate the new design, the GitHubFetcherRestTemplate constructor has been updated to accept an ExecutorService
+in addition to the RestTemplate, GitHub API URI, and token.
+
+The updated constructor signature is:
+
+```java
+public GitHubFetcherRestTemplate(RestTemplate restTemplate, String uri, String githubToken, ExecutorService executorService)
+   ```
+
+Key Changes
+
+1. ExecutorService: A new ExecutorService parameter has been added to the GitHubFetcherRestTemplate class to handle
+   asynchronous tasks for fetching repositories and branches. This change ensures better performance in scenarios with
+   many
+   requests to the GitHub API.
+
+2. Constructor Update: The GitHubFetcherRestTemplate class now requires an ExecutorService when being instantiated.
+   This change allows the application to perform non-blocking, concurrent API calls, which improves the overall
+   efficiency of data fetching. Here's how to update the instantiation of the class:
+
+```java
+ExecutorService executorService = Executors.newSingleThreadExecutor();
+gitHubFetcherRestTemplate = new GitHubFetcherRestTemplate(restTemplate, uri, token, executorService);
+```
+
+3. Asynchronous Requests: The use of ExecutorService enables asynchronous fetching of repositories and branches,
+   enhancing
+   the responsiveness of the application and reducing the risk of bottlenecks during API calls.
 
 ## Running the Application
 

@@ -13,6 +13,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 @Getter
 @Configuration
 @AllArgsConstructor
@@ -47,7 +50,17 @@ public class GitHubFetcherClientConfig {
     }
 
     @Bean
-    public GitHubFetcher remoteNumberGeneratorClient(RestTemplate restTemplate) {
-        return new GitHubFetcherRestTemplate(restTemplate, properties.uri(), properties.token());
+    public GitHubFetcher remoteNumberGeneratorClient(RestTemplate restTemplate, ExecutorService branchFetchExecutor) {
+        return new GitHubFetcherRestTemplate(
+                restTemplate,
+                properties.uri(),
+                properties.token(),
+                branchFetchExecutor
+        );
+    }
+
+    @Bean(destroyMethod = "shutdown")
+    public ExecutorService branchFetchExecutor() {
+        return Executors.newFixedThreadPool(30);
     }
 }

@@ -6,6 +6,8 @@ import org.example.githubrepofetcher.infrastructure.github.GitHubFetcherRestTemp
 import org.example.githubrepofetcher.infrastructure.github.GitHubFetcherRestTemplateConfigurationProperties;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.concurrent.ExecutorService;
+
 public class GitHubHttpClientConfigurationIntegrationTest extends GitHubFetcherClientConfig {
     public static final String WIRE_MOCK_HOST = "http://localhost";
 
@@ -15,6 +17,7 @@ public class GitHubHttpClientConfigurationIntegrationTest extends GitHubFetcherC
 
     public GitHubFetcher gitHubRepositoriesFetcherClient() {
         RestTemplate restTemplate = restTemplate(restTemplateResponseErrorHandler());
-        return new GitHubFetcherRestTemplate(restTemplate, WIRE_MOCK_HOST, getProperties().token());
+        ExecutorService executorService = branchFetchExecutor();
+        return new GitHubFetcherRestTemplate(restTemplate, WIRE_MOCK_HOST, getProperties().token(), executorService);
     }
 }
