@@ -1,6 +1,6 @@
 package org.example.githubrepofetcher;
 
-import org.example.githubrepofetcher.service.GitHubFetcherRestTemplateConfigurationProperties;
+import org.example.githubrepofetcher.infrastructure.github.GitHubFetcherRestTemplateConfigurationProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

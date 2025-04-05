@@ -2,9 +2,9 @@ package org.example.githubrepofetcher.feature;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import org.example.githubrepofetcher.BaseIntegrationTest;
-import org.example.githubrepofetcher.model.dto.GithubRepositoryDto;
+import org.example.githubrepofetcher.domain.model.dto.api.GithubRepositoryDto;
 import org.example.githubrepofetcher.service.GitHubRepositoryBranchesMockData;
-import org.example.githubrepofetcher.service.GitHubService;
+import org.example.githubrepofetcher.domain.service.GitHubService;
 import org.example.githubrepofetcher.service.UserGitHubRepositoriesMockData;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

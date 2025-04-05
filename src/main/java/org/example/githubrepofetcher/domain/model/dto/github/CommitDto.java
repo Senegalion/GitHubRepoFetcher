@@ -1,4 +1,4 @@
-package org.example.githubrepofetcher.model.dto;
+package org.example.githubrepofetcher.domain.model.dto.github;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Builder;

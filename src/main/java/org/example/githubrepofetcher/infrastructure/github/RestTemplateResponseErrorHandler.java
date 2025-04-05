@@ -1,4 +1,4 @@
-package org.example.githubrepofetcher.service;
+package org.example.githubrepofetcher.infrastructure.github;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;

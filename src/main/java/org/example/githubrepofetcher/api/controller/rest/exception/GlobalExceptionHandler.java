@@ -1,6 +1,6 @@
-package org.example.githubrepofetcher.controller.rest.exception.handler;
+package org.example.githubrepofetcher.api.controller.rest.exception;
 
-import org.example.githubrepofetcher.model.dto.ErrorResponseDto;
+import org.example.githubrepofetcher.domain.model.dto.api.ErrorResponseDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;

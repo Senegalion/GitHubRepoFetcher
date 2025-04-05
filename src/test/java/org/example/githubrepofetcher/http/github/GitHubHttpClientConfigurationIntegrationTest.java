@@ -1,9 +1,9 @@
 package org.example.githubrepofetcher.http.github;
 
-import org.example.githubrepofetcher.service.GitHubFetcher;
-import org.example.githubrepofetcher.service.GitHubFetcherClientConfig;
-import org.example.githubrepofetcher.service.GitHubFetcherRestTemplate;
-import org.example.githubrepofetcher.service.GitHubFetcherRestTemplateConfigurationProperties;
+import org.example.githubrepofetcher.domain.service.GitHubFetcher;
+import org.example.githubrepofetcher.infrastructure.github.GitHubFetcherClientConfig;
+import org.example.githubrepofetcher.infrastructure.github.GitHubFetcherRestTemplate;
+import org.example.githubrepofetcher.infrastructure.github.GitHubFetcherRestTemplateConfigurationProperties;
 import org.springframework.web.client.RestTemplate;
 
 public class GitHubHttpClientConfigurationIntegrationTest extends GitHubFetcherClientConfig {
