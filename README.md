@@ -137,12 +137,13 @@ Fetches GitHub repositories for a given user. Only repositories that are not for
     ```json
     {
         "status": 404,
-        "message": "User not found on GitHub"
+        "message": "GitHub user '{username}' not found"
     }
     ```
 
 ## Error Handling
 
+- **401** - User is unauthorized.
 - **404** - User not found on GitHub.
 - **500** - Server error when interacting with the GitHub API.
 - **503** - Service unavailable if the GitHub API is unreachable.
@@ -156,6 +157,10 @@ To run the tests, use:
 ```bash
 ./mvnw test
 ```
+
+Tests include:
+- verifying that the correct repositories are fetched for existing users.
+- ensuring the application correctly handles non-existent GitHub users.
 
 ## Contribution
 

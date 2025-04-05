@@ -3,14 +3,14 @@ server:
 
 spring:
   application:
-    name: GitHubRepoFetcher
+    name: GitHubRepoFetcherTest
 
 github:
   fetcher:
     http:
       client:
         config:
-          uri: ${GITHUB_API_URI:https://api.github.com}
+          uri: http://localhost:${wiremock.server.port}
           token: ${GITHUB_TOKEN}
           connectionTimeout: 5000
           readTimeout: 5000

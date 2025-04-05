@@ -8,7 +8,6 @@ import org.example.githubrepofetcher.model.dto.BranchDto;
 import org.example.githubrepofetcher.model.dto.GitHubBranchResponseDto;
 import org.example.githubrepofetcher.model.dto.GitHubRepositoryResponseDto;
 import org.example.githubrepofetcher.model.dto.GithubRepositoryDto;
-import org.example.githubrepofetcher.service.exception.GitHubUserNotFoundException;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.web.client.ResourceAccessException;
@@ -30,7 +29,6 @@ public class GitHubFetcherRestTemplate implements GitHubFetcher {
     public List<GithubRepositoryDto> fetchGitHubRepositories(String username) {
         log.info("Fetching GitHub repositories for user: {}", username);
         HttpHeaders headers = new HttpHeaders();
-        System.out.println("Using token: " + githubToken);
         headers.set("Authorization", "Bearer " + githubToken);
         final HttpEntity<HttpHeaders> requestEntity = new HttpEntity<>(headers);
 
@@ -42,11 +40,13 @@ public class GitHubFetcherRestTemplate implements GitHubFetcher {
                     .collect(Collectors.toList());
         } catch (ResourceAccessException e) {
             log.error("Error while fetching GitHub repositories: {}", e.getMessage());
-            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "GitHub API not available");
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Network error while fetching repositories");
         }
     }
 
     private List<GitHubRepositoryResponseDto> getUserRepositories(String username, HttpEntity<HttpHeaders> requestEntity) {
+        checkIfUserExists(username, requestEntity);
+
         final String url = UriComponentsBuilder.fromUriString(uri + "/users/" + username + "/repos")
                 .toUriString();
         try {
@@ -61,13 +61,46 @@ public class GitHubFetcherRestTemplate implements GitHubFetcher {
             List<GitHubRepositoryResponseDto> repos = response.getBody();
             if (repos.isEmpty()) {
                 log.warn("No repositories found for user: {}", username);
-                throw new GitHubUserNotFoundException("User found, but no repositories available");
             }
 
             return repos;
         } catch (ResponseStatusException e) {
-            log.warn("User {} not found on GitHub", username);
-            throw new GitHubUserNotFoundException("User not found on GitHub");
+            log.error("Error occurred while fetching repositories: {}", e.getMessage());
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "GitHub API is unavailable");
+        }
+    }
+
+    private void checkIfUserExists(String username, HttpEntity<HttpHeaders> requestEntity) {
+        final String url = UriComponentsBuilder.fromUriString(uri + "/users/" + username)
+                .toUriString();
+
+        try {
+            restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    requestEntity,
+                    Void.class
+            );
+        } catch (ResponseStatusException e) {
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                log.warn("User {} not found on GitHub", username);
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "GitHub user '" + username + "' not found");
+            } else if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
+                log.warn("Unauthorized when accessing user {}.", username);
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized access");
+            } else if (e.getStatusCode() == HttpStatus.TOO_MANY_REQUESTS) {
+                log.warn("Too many requests for user {}", username);
+                throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "Too many requests to GitHub API");
+            } else {
+                log.error("Error while checking if user exists: {}", e.getMessage());
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "GitHub API is unavailable");
+            }
+        } catch (ResourceAccessException e) {
+            log.error("Connection error while checking user existence: {}", e.getMessage());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "GitHub API is unavailable");
+        } catch (Exception e) {
+            log.error("Unexpected error while checking user existence: {}", e.getMessage());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error occurred");
         }
     }
 
@@ -109,11 +142,11 @@ public class GitHubFetcherRestTemplate implements GitHubFetcher {
 
             } catch (Exception e) {
                 log.error("Failed to deserialize branches: {}", e.getMessage());
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Branch response format invalid");
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } else {
             log.error("GitHub returned non-2xx: {} Body: {}", rawResponse.getStatusCode(), rawResponse.getBody());
-            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "GitHub error");
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

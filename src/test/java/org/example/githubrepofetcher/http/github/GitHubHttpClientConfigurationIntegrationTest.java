@@ -1,0 +1,20 @@
+package org.example.githubrepofetcher.http.github;
+
+import org.example.githubrepofetcher.service.GitHubFetcher;
+import org.example.githubrepofetcher.service.GitHubFetcherClientConfig;
+import org.example.githubrepofetcher.service.GitHubFetcherRestTemplate;
+import org.example.githubrepofetcher.service.GitHubFetcherRestTemplateConfigurationProperties;
+import org.springframework.web.client.RestTemplate;
+
+public class GitHubHttpClientConfigurationIntegrationTest extends GitHubFetcherClientConfig {
+    public static final String WIRE_MOCK_HOST = "http://localhost";
+
+    public GitHubHttpClientConfigurationIntegrationTest(GitHubFetcherRestTemplateConfigurationProperties properties) {
+        super(properties);
+    }
+
+    public GitHubFetcher gitHubRepositoriesFetcherClient() {
+        RestTemplate restTemplate = restTemplate(restTemplateResponseErrorHandler());
+        return new GitHubFetcherRestTemplate(restTemplate, WIRE_MOCK_HOST, getProperties().token());
+    }
+}
